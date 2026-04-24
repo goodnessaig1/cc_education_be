@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Page {
+  id        String    @id @default(uuid())
+  name      String    // E.g., "Contact Us"
+  slug      String    @unique // E.g., "/contact"
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sections  Section[]
+}
+
+model SiteConfig {
+  id             String   @id @default("default-config")
+  layoutType     String   @default("home1")
+  siteTitle      String   @default("Edulearn")
+  logoUrl        String?
+  faviconUrl     String?  // New field
+  colors         Json     @default("{\"primary\": \"#ff3115\", \"secondary\": \"#212121\", \"bg\": \"#ffffff\", \"text\": \"#000000\"}") // Unified colors
+  updatedAt      DateTime @updatedAt
+}
+
+model Section {
+  id         String   @id @default(uuid())
+  type       String   // Hero, AboutUs, Courses, etc.
+  pageId     String   // Relation to Page
+  page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  isVisible  Boolean  @default(true)
+  variation  String   @default("style1")
+  content    Json     // Stores text, local icons, image URLs
+  order      Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model PublishedDeployment {
+  id          String   @id @default("live")
+  publishedAt DateTime @default(now())
+  data        Json     // Serialized dump of Pages, Config, and Sections
+}
